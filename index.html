@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080c14">
+<title>Particle Loop Seamless Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#080c14;--panel:#101827;--line:#26354a;--muted:#9eafc6;--text:#edf4ff;--blue:#48b5ff;--green:#6bf0b0}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#18304b 0,transparent 50%),var(--bg);color:var(--text);font:14px/1.5 system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{padding:24px clamp(16px,4vw,42px) 18px;border-bottom:1px solid #1d2a3c;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:13px}.mark{width:43px;height:43px;border:1px solid #3c86b6;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#172a40,#0c1420);box-shadow:0 0 24px #2288ca25;color:var(--blue);font-size:22px}.eyebrow{color:var(--green);font-size:10px;letter-spacing:.2em;text-transform:uppercase;font-weight:800}h1{font-size:clamp(18px,2.4vw,26px);letter-spacing:-.04em;margin:1px 0 0}.status{color:var(--muted);font-size:12px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;padding:20px clamp(12px,3vw,32px) 30px;max-width:1500px;margin:auto}.stage,.panel{background:linear-gradient(145deg,#111b2b,#0c1320);border:1px solid var(--line);border-radius:16px;overflow:hidden}.stage-head,.panel-head{padding:13px 16px;border-bottom:1px solid #233146;display:flex;align-items:center;justify-content:space-between;gap:12px}.stage-head strong,.panel-head strong{font-size:13px}.stage-head span{color:var(--muted);font-size:11px}.canvas-wrap{position:relative;padding:14px;background:#05080f;min-height:300px;display:grid;place-items:center}.canvas-frame{width:100%;max-width:100%;border:1px solid #263b54;background:#02050a;box-shadow:0 12px 38px #0007;overflow:hidden}canvas{display:block;width:100%;height:auto;aspect-ratio:16/9}.canvas-caption{position:absolute;bottom:24px;left:24px;color:#6c809b;font-size:10px;letter-spacing:.08em;pointer-events:none}.transport{padding:13px 15px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid #1d2a3c}.btn{border:1px solid #354961;background:#172438;color:var(--text);padding:9px 12px;border-radius:9px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}.btn:hover{border-color:#4daee9;transform:translateY(-1px)}.btn.primary{background:linear-gradient(135deg,#167dc2,#1760a0);border-color:#3196d7}.btn.green{border-color:#2b916d;color:#baffdb;background:#102a25}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}.spacer{flex:1}.hint{font-size:11px;color:var(--muted)}aside{display:flex;flex-direction:column;gap:14px}.controls{padding:15px;display:grid;gap:17px}.control{display:grid;gap:7px}.label-row{display:flex;justify-content:space-between;gap:8px;align-items:center}.label-row label{font-size:12px;font-weight:650}.value{font-variant-numeric:tabular-nums;color:var(--blue);font-size:11px}.sub{font-size:10px;color:var(--muted)}input[type=range]{width:100%;accent-color:#48b5ff}select,input[type=color]{background:#0a1220;border:1px solid #30445c;color:var(--text);border-radius:8px;padding:8px;width:100%;min-height:35px}input[type=color]{padding:3px;height:35px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.toggle-row label{font-size:12px}.toggle-row input{accent-color:#48b5ff}.preset-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.preset{background:#111e30;border:1px solid #2c4058;border-radius:8px;color:#cbd9eb;padding:9px 7px;text-align:left;font-size:11px;cursor:pointer}.preset:hover{border-color:#48b5ff}.preset b{display:block;color:#edf4ff;font-size:12px;margin-bottom:2px}.foot{padding:0 16px 14px;color:var(--muted);font-size:10px}.notice{padding:12px 14px;background:#0d1b29;border:1px solid #25445e;border-radius:12px;color:#afc8df;font-size:11px}.notice b{color:#eaf6ff}.toast{min-height:18px;color:#8ee8bb;font-size:11px}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.panel-head{grid-column:1/-1}.canvas-wrap{min-height:180px}}@media(max-width:520px){header{padding:16px}.layout{padding:12px}.controls{grid-template-columns:1fr}.canvas-wrap{padding:6px}.canvas-caption{display:none}.status{display:none}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="mark">✳</div><div><div class="eyebrow">Visual asset workstation</div><h1>Particle Loop <span style="color:#63c2ff">Seamless</span> Studio</h1></div></div><div class="status">LOCAL RENDER · NO ACCOUNT · NO CLOUD UPLOAD</div></header>
+<main class="layout">
+<section class="stage">
+<div class="stage-head"><strong>LIVE CANVAS</strong><span id="formatLabel">1920 × 1080 · 16:9</span></div>
+<div class="canvas-wrap"><div class="canvas-frame"><canvas id="scene" width="960" height="540" aria-label="Animated seamless particle loop preview"></canvas></div><div class="canvas-caption">PREVIEW · LOOP-SAFE MOTION</div></div>
+<div class="transport"><button class="btn primary" id="playBtn">Ⅱ Pause</button><button class="btn" id="resetBtn">↺ Restart</button><button class="btn" id="pngBtn">↓ Export PNG</button><button class="btn green" id="webmBtn">● Record 4s WebM</button><span class="spacer"></span><span class="hint" id="loopLabel">Loop: 4.0 seconds</span></div>
+<div style="padding:0 15px 14px"><div class="toast" id="toast" role="status" aria-live="polite"></div><div class="hint">PNG exports the current frame with transparency when enabled. WebM recording uses the canvas capture feature supported by your browser.</div></div>
+</section>
+<aside>
+<section class="panel"><div class="panel-head"><strong>01 / CANVAS & PRESET</strong><span class="eyebrow">Setup</span></div><div class="controls">
+<div class="control"><div class="label-row"><label for="ratio">Aspect ratio</label></div><select id="ratio"><option value="16:9">16:9 · YouTube / desktop</option><option value="9:16">9:16 · Shorts / Reels</option><option value="1:1">1:1 · Square post</option><option value="4:5">4:5 · Portrait post</option><option value="21:9">21:9 · Cinematic</option></select></div>
+<div class="control"><div class="label-row"><label for="preset">Motion recipe</label></div><select id="preset"><option value="aurora">Aurora drift</option><option value="stardust">Stardust field</option><option value="embers">Warm embers</option><option value="ice">Arctic particles</option><option value="orbit">Orbital flow</option><option value="minimal">Minimal dust</option></select></div>
+<div class="control"><div class="label-row"><label for="quality">Render size</label></div><select id="quality"><option value="960">Preview / 960px</option><option value="1280">HD / 1280px</option><option value="1920">Full HD / 1920px</option></select><div class="sub">Higher resolutions use more memory and CPU.</div></div>
+</div></section>
+<section class="panel"><div class="panel-head"><strong>02 / PARTICLE ENGINE</strong><span class="eyebrow">Motion</span></div><div class="controls">
+<div class="control"><div class="label-row"><label for="count">Particle density</label><span class="value" id="countVal">110</span></div><input id="count" type="range" min="20" max="260" step="10" value="110"></div>
+<div class="control"><div class="label-row"><label for="speed">Drift speed</label><span class="value" id="speedVal">0.65×</span></div><input id="speed" type="range" min="0.15" max="1.5" step="0.05" value="0.65"></div>
+<div class="control"><div class="label-row"><label for="size">Particle size</label><span class="value" id="sizeVal">2.0</span></div><input id="size" type="range" min="0.5" max="5" step="0.5" value="2"></div>
+<div class="control"><div class="label-row"><label for="glow">Glow strength</label><span class="value" id="glowVal">0.45</span></div><input id="glow" type="range" min="0" max="1" step="0.05" value="0.45"></div>
+<div class="control"><div class="label-row"><label for="duration">Loop duration</label><span class="value" id="durationVal">4s</span></div><input id="duration" type="range" min="2" max="12" step="1" value="4"></div>
+</div></section>
+<section class="panel"><div class="panel-head"><strong>03 / LOOK & EXPORT</strong><span class="eyebrow">Finish</span></div><div class="controls">
+<div class="two"><div class="control"><label for="colorA" style="font-size:12px">Primary color</label><input id="colorA" type="color" value="#48b5ff"></div><div class="control"><label for="colorB" style="font-size:12px">Accent color</label><input id="colorB" type="color" value="#6bf0b0"></div></div>
+<div class="toggle-row"><label for="transparent">Transparent background</label><input id="transparent" type="checkbox" checked></div>
+<div class="toggle-row"><label for="trails">Soft light trails</label><input id="trails" type="checkbox" checked></div>
+<div class="toggle-row"><label for="connect">Connect nearby particles</label><input id="connect" type="checkbox"></div>
+<div class="control"><button class="btn" id="randomBtn">✦ Generate new arrangement</button><button class="btn" id="defaultsBtn">Restore default settings</button></div>
+</div><div class="foot">For compositing, import a transparent PNG frame or record the loop, then verify the final export in your editor.</div></section>
+<div class="notice"><b>Designed for creators.</b> Use particle overlays in lyric videos, music visuals, transitions, backgrounds, and social edits. For a seamless video loop, check the first/last frame and encode with a matching frame rate in your editor.</div>
+</aside>
+</main>
+<script>
+(function(){
+'use strict';
+const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d',{alpha:true});
+const $=id=>document.getElementById(id);
+const defaults={ratio:'16:9',preset:'aurora',quality:'960',count:110,speed:.65,size:2,glow:.45,duration:4,colorA:'#48b5ff',colorB:'#6bf0b0',transparent:true,trails:true,connect:false};
+let cfg={...defaults},particles=[],playing=true,start=performance.now(),pausedAt=0,raf=0,seed=48271,recording=false;
+function rand(){seed=(seed*16807)%2147483647;return(seed-1)/2147483646}
+function hexRgb(hex){return [parseInt(hex.slice(1,3),16),parseInt(hex.slice(3,5),16),parseInt(hex.slice(5,7),16)]}
+function rgba(hex,a){const c=hexRgb(hex);return 'rgba('+c[0]+','+c[1]+','+c[2]+','+Math.max(0,Math.min(1,a))+')'}
+function ratioDims(r,w){const p=r.split(':').map(Number);return [w,Math.round(w*p[1]/p[0])]}
+function rebuild(){seed=seed+7919;const w=canvas.width,h=canvas.height;particles=[];for(let i=0;i<Number(cfg.count);i++){let x=rand(),y=rand(),phase=rand()*Math.PI*2;particles.push({x,y,phase,r:.4+rand()*1.4,alpha:.25+rand()*.7,orbit:.006+rand()*.04,turn:rand()*Math.PI*2,layer:rand(),color:rand()>.5?0:1,elong:rand()})}render(performance.now())}
+function point(p,t){const s=Number(cfg.speed),kind=cfg.preset;let x=p.x,y=p.y,phase=t*Math.PI*2+p.phase;
+if(kind==='orbit'){const a=p.turn+t*Math.PI*2*s*(.25+p.layer*.6);x=.5+(p.x-.5)*Math.cos(t*Math.PI*2*s*.18)+(Math.cos(a)*(.05+p.layer*.18));y=.5+(p.y-.5)*Math.cos(t*Math.PI*2*s*.18)+Math.sin(a)*(.04+p.layer*.15)}
+else if(kind==='embers'){y=(p.y-.12*Math.sin(phase)+t*.0+1)%1;x=x+.035*Math.sin(phase*.7)}
+else if(kind==='ice'){x+=.018*Math.sin(phase*.7);y+=.025*Math.cos(phase)}
+else if(kind==='minimal'){x+=.012*Math.sin(phase);y+=.01*Math.cos(phase*.8)}
+else if(kind==='stardust'){x+=.018*Math.sin(phase*1.2);y+=.02*Math.cos(phase*.7)}
+else{x+=.045*Math.sin(phase+p.y*4);y+=.025*Math.cos(phase*.75+p.x*5)}
+return {x:((x%1)+1)%1,y:((y%1)+1)%1,phase}}
+function render(now){const w=canvas.width,h=canvas.height,t=((now-start)/1000/Number(cfg.duration))%1;ctx.clearRect(0,0,w,h);
+if(!cfg.transparent){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#071322');g.addColorStop(1,'#02050b');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
+const pts=particles.map(p=>{const q=point(p,t);return {x:q.x*w,y:q.y*h,p,q}})
+if(cfg.connect){ctx.lineWidth=Math.max(.5,w/1800);for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<w*.075){ctx.strokeStyle=rgba(pts[i].p.color?cfg.colorB:cfg.colorA,(1-d/(w*.075))*.16);ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
+for(const o of pts){const p=o.p,x=o.x,y=o.y;const pulse=.65+.35*Math.sin(o.q.phase);const radius=(Number(cfg.size)*w/960)*(0.45+p.r*.45);const color=p.color?cfg.colorB:cfg.colorA;const alpha=p.alpha*pulse;
+if(cfg.trails){ctx.strokeStyle=rgba(color,alpha*.22);ctx.lineWidth=Math.max(.5,radius*.55);ctx.beginPath();ctx.moveTo(x-radius*(2+2*Math.sin(o.q.phase)),y+radius);ctx.lineTo(x,y);ctx.stroke()}
+if(cfg.glow>0){ctx.beginPath();ctx.fillStyle=rgba(color,alpha*Number(cfg.glow)*.22);ctx.arc(x,y,radius*(2.3+Number(cfg.glow)*2),0,Math.PI*2);ctx.fill()}
+ctx.beginPath();ctx.fillStyle=rgba(color,alpha);ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();
+if(p.r>1.5){ctx.beginPath();ctx.fillStyle='rgba(255,255,255,'+(alpha*.6)+')';ctx.arc(x,y,radius*.28,0,Math.PI*2);ctx.fill()}}
+if(playing)raf=requestAnimationFrame(render)}
+function restart(){cancelAnimationFrame(raf);start=performance.now();playing=true;$('playBtn').textContent='Ⅱ Pause';raf=requestAnimationFrame(render)}
+function resize(){const oldW=canvas.width;const w=Number(cfg.quality);const dims=ratioDims(cfg.ratio,w);canvas.width=dims[0];canvas.height=dims[1];$('formatLabel').textContent=dims[0]+' × '+dims[1]+' · '+cfg.ratio;rebuild();restart()}
+function sync(){['count','speed','size','glow','duration'].forEach(k=>{const el=$(k);cfg[k]=Number(el.value);const fmt=k==='speed'?cfg[k].toFixed(2)+'×':k==='duration'?cfg[k]+'s':k==='size'?cfg[k].toFixed(1):k==='glow'?cfg[k].toFixed(2):cfg[k];$(k+'Val').textContent=fmt});cfg.colorA=$('colorA').value;cfg.colorB=$('colorB').value;cfg.transparent=$('transparent').checked;cfg.trails=$('trails').checked;cfg.connect=$('connect').checked;cfg.preset=$('preset').value;cfg.ratio=$('ratio').value;cfg.quality=$('quality').value;resize()}
+['count','speed','size','glow','duration','colorA','colorB','transparent','trails','connect','preset','ratio','quality'].forEach(id=>$(id).addEventListener('input',()=>{if(id==='ratio'||id==='quality'||id==='count')sync();else{cfg[id]=(['transparent','trails','connect'].includes(id))?$(id).checked:$(id).value;if(['speed','size','glow','duration'].includes(id))cfg[id]=Number(cfg[id]);syncValues();render(performance.now())}}));
+function syncValues(){['count','speed','size','glow','duration'].forEach(k=>{cfg[k]=Number($(k).value);$(k+'Val').textContent=k==='speed'?cfg[k].toFixed(2)+'×':k==='duration'?cfg[k]+'s':k==='size'?cfg[k].toFixed(1):k==='glow'?cfg[k].toFixed(2):cfg[k]});cfg.colorA=$('colorA').value;cfg.colorB=$('colorB').value;cfg.transparent=$('transparent').checked;cfg.trails=$('trails').checked;cfg.connect=$('connect').checked;cfg.preset=$('preset').value;cfg.ratio=$('ratio').value;cfg.quality=$('quality').value}
+$('playBtn').onclick=()=>{playing=!playing;if(playing){start+=performance.now()-pausedAt;$('playBtn').textContent='Ⅱ Pause';raf=requestAnimationFrame(render)}else{pausedAt=performance.now();cancelAnimationFrame(raf);$('playBtn').textContent='▶ Play'}};
+$('resetBtn').onclick=restart;
+$('randomBtn').onclick=()=>{rebuild();toast('New particle arrangement generated.')};
+$('defaultsBtn').onclick=()=>{cfg={...defaults};Object.keys(defaults).forEach(k=>{const el=$(k);if(!el)return;if(el.type==='checkbox')el.checked=defaults[k];else el.value=defaults[k]});sync();toast('Default settings restored.')};
+$('pngBtn').onclick=()=>{try{canvas.toBlob(blob=>{if(!blob){toast('PNG export failed in this browser.');return}download(blob,'particle-loop-frame.png');toast('PNG frame exported.')},'image/png')}catch(e){toast('Could not export canvas. Try a modern browser.')}};
+$('webmBtn').onclick=async()=>{if(!canvas.captureStream||!window.MediaRecorder){toast('WebM recording is not supported by this browser. Try Chrome or Edge on a newer system.');return}if(recording)return;recording=true;$('webmBtn').disabled=true;const wasPlaying=playing;if(!playing){playing=true;start=performance.now();raf=requestAnimationFrame(render)}try{const stream=canvas.captureStream(30);let mime='video/webm;codecs=vp9';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';const rec=new MediaRecorder(stream,MediaRecorder.isTypeSupported(mime)?{mimeType:mime}:undefined);const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};rec.onerror=()=>toast('Recording failed. Browser or memory limit may have been reached.');rec.onstop=()=>{download(new Blob(chunks,{type:'video/webm'}),'particle-loop-'+cfg.duration+'s.webm');stream.getTracks().forEach(t=>t.stop());recording=false;$('webmBtn').disabled=false;if(!wasPlaying){playing=false;cancelAnimationFrame(raf);$('playBtn').textContent='▶ Play'}toast('WebM recording exported. Check loop seam in your editor.')};rec.start();toast('Recording '+cfg.duration+' second loop…');setTimeout(()=>{if(rec.state!=='inactive')rec.stop()},Number(cfg.duration)*1000)}catch(e){recording=false;$('webmBtn').disabled=false;toast('Recording could not start in this browser.')}}
+function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
+function toast(s){$('toast').textContent=s}
+sync();restart();
+})();
+</script>
+</body>
+</html>
