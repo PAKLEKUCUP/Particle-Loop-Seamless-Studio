@@ -124,7 +124,8 @@ function drawAurora(w,h,t){
 }
 function render(now){const w=canvas.width,h=canvas.height,t=((now-start)/1000/Number(cfg.duration))%1;ctx.clearRect(0,0,w,h);
 if(!cfg.transparent){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#071322');g.addColorStop(1,'#02050b');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
-if(cfg.preset==='aurora'){drawAurora(w,h,t);if(playing)raf=requestAnimationFrame(render);return}\nconst pts=particles.map(p=>{const q=point(p,t);return {x:q.x*w,y:q.y*h,p,q}})
+if(cfg.preset==='aurora'){drawAurora(w,h,t);if(playing)raf=requestAnimationFrame(render);return}
+const pts=particles.map(p=>{const q=point(p,t);return {x:q.x*w,y:q.y*h,p,q}})
 if(cfg.connect){ctx.lineWidth=Math.max(.5,w/1800);for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<w*.075){ctx.strokeStyle=rgba(pts[i].p.color?cfg.colorB:cfg.colorA,(1-d/(w*.075))*.16);ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
 for(const o of pts){const p=o.p,x=o.x,y=o.y;const pulse=.65+.35*Math.sin(o.q.phase);const radius=(Number(cfg.size)*w/960)*(0.45+p.r*.45);const color=p.color?cfg.colorB:cfg.colorA;const alpha=p.alpha*pulse;
 if(cfg.trails){ctx.strokeStyle=rgba(color,alpha*.22);ctx.lineWidth=Math.max(.5,radius*.55);ctx.beginPath();ctx.moveTo(x-radius*(2+2*Math.sin(o.q.phase)),y+radius);ctx.lineTo(x,y);ctx.stroke()}
