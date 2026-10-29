@@ -233,8 +233,7 @@ if(cfg.preset==='embers'){
   ctx.strokeStyle=rgba('#c8f2ff',alpha);ctx.lineWidth=Math.max(.7,base*.35);
   for(let a=0;a<6;a++){const ang=a*Math.PI/3;ctx.beginPath();ctx.moveTo(x-Math.cos(ang)*base*2,y-Math.sin(ang)*base*2);ctx.lineTo(x+Math.cos(ang)*base*2,y+Math.sin(ang)*base*2);ctx.stroke()}
 }else if(cfg.preset==='orbit'){
-  ctx.strokeStyle=rgba(color,alpha*.7);ctx.lineWidth=Math.max(.6,base*.3);
-  ctx.beginPath();ctx.ellipse(x,y,base*5,base*1.8,phase*.08,0,Math.PI*2);ctx.stroke();
+  // Orbital Flow: render only the particle dot; no surrounding orbit ring.
   ctx.fillStyle=rgba('#ffffff',alpha);ctx.beginPath();ctx.arc(x,y,base*.8,0,Math.PI*2);ctx.fill();
 }else if(cfg.preset==='minimal'){
   ctx.fillStyle=rgba(color,alpha*.55);ctx.beginPath();ctx.arc(x,y,Math.max(.5,base*.45),0,Math.PI*2);ctx.fill();
