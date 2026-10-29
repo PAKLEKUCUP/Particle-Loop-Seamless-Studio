@@ -25,11 +25,11 @@ header{padding:24px clamp(16px,4vw,42px) 18px;border-bottom:1px solid #1d2a3c;di
 <aside>
 <section class="panel"><div class="panel-head"><strong>01 / CANVAS & PRESET</strong><span class="eyebrow">Setup</span></div><div class="controls">
 <div class="control"><div class="label-row"><label for="ratio">Aspect ratio</label></div><select id="ratio"><option value="16:9">16:9 · YouTube / desktop</option><option value="9:16">9:16 · Shorts / Reels</option><option value="1:1">1:1 · Square post</option><option value="4:5">4:5 · Portrait post</option><option value="21:9">21:9 · Cinematic</option></select></div>
-<div class="control"><div class="label-row"><label for="preset">Motion recipe</label></div><select id="preset"><option value="aurora">Aurora drift</option><option value="stardust">Stardust field</option><option value="embers">Warm embers</option><option value="ice">Arctic particles</option><option value="orbit">Orbital flow</option><option value="minimal">Minimal dust</option><option value="bokeh">Bokeh drift</option><option value="nebula">Nebula veil</option><option value="fireflies">Fireflies</option><option value="snow">Snowfall</option></select></div>
+<div class="control"><div class="label-row"><label for="preset">Motion recipe</label></div><select id="preset"><option value="aurora">Falling Snow</option><option value="stardust">Stardust field</option><option value="embers">Warm embers</option><option value="ice">Arctic particles</option><option value="orbit">Orbital flow</option><option value="minimal">Minimal dust</option><option value="bokeh">Bokeh drift</option><option value="nebula">Nebula veil</option><option value="fireflies">Fireflies</option><option value="snow">Snowfall</option></select></div>
 <div class="control"><div class="label-row"><label for="quality">Render size</label></div><select id="quality"><option value="960">Preview / 960px</option><option value="1280">HD / 1280px</option><option value="1920">Full HD / 1920px</option></select><div class="sub">Higher resolutions use more memory and CPU.</div></div>
 </div></section>
 <section class="panel"><div class="panel-head"><strong>PRESET LIBRARY</strong><span class="eyebrow">10 looks</span></div><div class="library-grid" id="libraryGrid">
-<button class="library-card" data-preset="aurora"><b>Aurora Drift</b><small>Flowing light curtains</small></button>
+<button class="library-card" data-preset="aurora"><b>Falling Snow</b><small>Soft, continuously falling snow</small></button>
 <button class="library-card" data-preset="stardust"><b>Stardust Field</b><small>Fine drifting particles</small></button>
 <button class="library-card" data-preset="embers"><b>Warm Embers</b><small>Rising glowing sparks</small></button>
 <button class="library-card" data-preset="ice"><b>Arctic Particles</b><small>Cool crystalline drift</small></button>
@@ -105,6 +105,10 @@ if(kind==='orbit'){
 }else if(kind==='snow'){
   x+=.018*Math.sin(phase*2+p.phase);
   y+=.045*Math.sin(phase);
+}else if(kind==='aurora'){
+  const fall=(t*cycles*.20)%1;
+  y=(p.y+fall)%1;
+  x+=.018*Math.sin(phase+p.y*5);
 }else{
   x+=.035*Math.sin(phase);
   y+=.025*Math.cos(phase);
@@ -170,15 +174,15 @@ function drawAurora(w,h,t){
 }
 function render(now){if(playing&&now-lastFrame<32){raf=requestAnimationFrame(render);return}lastFrame=now;const w=canvas.width,h=canvas.height,t=((now-start)/1000/Number(cfg.duration))%1;ctx.clearRect(0,0,w,h);
 if(!cfg.transparent){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#071322');g.addColorStop(1,'#02050b');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
-if(cfg.preset==='aurora'){drawAurora(w,h,t);if(playing)raf=requestAnimationFrame(render);return}
+
 const pts=particles.map(p=>{const q=point(p,t);return {x:q.x*w,y:q.y*h,p,q}})
 if(cfg.connect){ctx.lineWidth=Math.max(.5,w/1800);for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<w*.075){ctx.strokeStyle=rgba(pts[i].p.color?cfg.colorB:cfg.colorA,(1-d/(w*.075))*.16);ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
-for(const o of pts){const p=o.p,x=o.x,y=o.y;const pulse=.65+.35*Math.sin(o.q.phase);const radius=(Number(cfg.size)*w/960)*(0.45+p.r*.45)*(cfg.preset==='bokeh'?2.8:cfg.preset==='fireflies'?1.5:1);const color=p.color?cfg.colorB:cfg.colorA;const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100);
+for(const o of pts){const p=o.p,x=o.x,y=o.y;const pulse=.65+.35*Math.sin(o.q.phase);const radius=(Number(cfg.size)*w/960)*(0.45+p.r*.45)*(cfg.preset==='bokeh'?2.8:cfg.preset==='fireflies'?1.5:cfg.preset==='aurora'?0.85:1);const color=p.color?cfg.colorB:cfg.colorA;const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100);
 if(cfg.preset==='nebula'){const rg=ctx.createRadialGradient(x,y,0,x,y,radius*9);rg.addColorStop(0,rgba(color,alpha*.14));rg.addColorStop(1,rgba(color,0));ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,radius*9,0,Math.PI*2);ctx.fill()}
 if(cfg.trails){ctx.strokeStyle=rgba(color,alpha*.22);ctx.lineWidth=Math.max(.5,radius*.55);ctx.beginPath();ctx.moveTo(x-radius*(2+2*Math.sin(o.q.phase)),y+radius);ctx.lineTo(x,y);ctx.stroke()}
 if(cfg.glow>0){ctx.beginPath();ctx.fillStyle=rgba(color,alpha*Number(cfg.glow)*.22);ctx.arc(x,y,radius*(2.3+Number(cfg.glow)*2),0,Math.PI*2);ctx.fill()}
 ctx.save();ctx.shadowColor=rgba(color,alpha*.9);ctx.shadowBlur=Number(cfg.blur)*(w/960);ctx.beginPath();ctx.fillStyle=rgba(color,alpha);ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();ctx.restore();
-if(cfg.preset==='snow'){ctx.strokeStyle=rgba(color,alpha*.7);ctx.lineWidth=Math.max(1,radius*.45);ctx.beginPath();ctx.moveTo(x-radius,y);ctx.lineTo(x+radius,y);ctx.moveTo(x,y-radius);ctx.lineTo(x,y+radius);ctx.stroke()}
+if(cfg.preset==='snow'||cfg.preset==='aurora'){ctx.strokeStyle=rgba(color,alpha*.7);ctx.lineWidth=Math.max(1,radius*.45);ctx.beginPath();ctx.moveTo(x-radius,y);ctx.lineTo(x+radius,y);ctx.moveTo(x,y-radius);ctx.lineTo(x,y+radius);ctx.stroke()}
 if(p.r>1.5){ctx.beginPath();ctx.fillStyle='rgba(255,255,255,'+(alpha*.6)+')';ctx.arc(x,y,radius*.28,0,Math.PI*2);ctx.fill()}}
 if(playing)raf=requestAnimationFrame(render)}
 function restart(){cancelAnimationFrame(raf);start=performance.now();playing=true;$('playBtn').textContent='Ⅱ Pause';raf=requestAnimationFrame(render)}
