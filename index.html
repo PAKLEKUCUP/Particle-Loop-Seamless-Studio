@@ -211,7 +211,7 @@ function drawCinematicAtmosphere(w,h,t){
   }
   ctx.restore();
 }
-function render(now){if(playing&&now-lastFrame<32){raf=requestAnimationFrame(render);return}lastFrame=now;const w=canvas.width,h=canvas.height,t=((now-start)/1000/Number(cfg.duration))%1;ctx.clearRect(0,0,w,h);
+function render(now,forcedT){if(forcedT===undefined&&playing&&now-lastFrame<32){raf=requestAnimationFrame(render);return}lastFrame=now;const w=canvas.width,h=canvas.height,t=forcedT===undefined?(((now-start)/1000/Number(cfg.duration))%1):forcedT;ctx.clearRect(0,0,w,h);
 if(!cfg.transparent){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#071322');g.addColorStop(1,'#02050b');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
 drawCinematicAtmosphere(w,h,t);
 
@@ -224,7 +224,7 @@ const depth=.32+p.layer*.95;
 const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100)*(.48+p.layer*.52);
 const base=Number(cfg.size)*w/960*(.45+p.r*.62)*depth;
 ctx.save();ctx.globalAlpha=alpha;
-ctx.shadowColor=rgba(color,.8);ctx.shadowBlur=Math.min(22,Number(cfg.blur)*2.2+glow*10)*(0.35+p.layer*.65);
+ctx.shadowColor=rgba(color,.8);ctx.shadowBlur=Math.min(22,Number(cfg.blur)*2.2+Number(cfg.glow)*10)*(0.35+p.layer*.65);
 if(cfg.preset==='embers'){
   ctx.lineCap='round';ctx.strokeStyle=rgba('#ff8a24',alpha);ctx.lineWidth=Math.max(1,base*.8);
   ctx.beginPath();ctx.moveTo(x,y+base*3);ctx.lineTo(x+Math.sin(phase)*base*.7,y-base*2.5);ctx.stroke();
@@ -263,7 +263,7 @@ if(cfg.preset==='embers'){
 }
 ctx.restore();
 }
-if(playing)raf=requestAnimationFrame(render)}
+if(playing&&forcedT===undefined)raf=requestAnimationFrame(render)}
 function restart(){cancelAnimationFrame(raf);start=performance.now();playing=true;$('playBtn').textContent='Ⅱ Pause';raf=requestAnimationFrame(render)}
 function resize(){const oldW=canvas.width;const w=Number(cfg.quality);const dims=ratioDims(cfg.ratio,w);canvas.width=dims[0];canvas.height=dims[1];$('formatLabel').textContent=dims[0]+' × '+dims[1]+' · '+cfg.ratio;rebuild();restart()}
 function sync(){['count','speed','size','glow','blur','transparency'].forEach(k=>{const el=$(k);cfg[k]=Number(el.value);const fmt=k==='speed'?cfg[k].toFixed(2)+'×':k==='size'?cfg[k].toFixed(1):k==='glow'?cfg[k].toFixed(2):k==='blur'?cfg[k].toFixed(1):k==='transparency'?cfg[k]+'%':cfg[k];$(k+'Val').textContent=fmt});cfg.duration=autoLoopDuration();updateLoopModeUI();cfg.colorA=$('colorA').value;cfg.colorB=$('colorB').value;cfg.transparent=$('transparent').checked;cfg.trails=$('trails').checked;cfg.connect=$('connect').checked;cfg.preset=$('preset').value;cfg.ratio=$('ratio').value;cfg.quality=$('quality').value;resize()}
@@ -277,7 +277,41 @@ $('preset').addEventListener('change',()=>{document.querySelectorAll('.library-c
 $('randomBtn').onclick=()=>{rebuild();toast('New particle arrangement generated.')};
 $('defaultsBtn').onclick=()=>{$('loopMode').value='auto';cfg={...defaults};Object.keys(defaults).forEach(k=>{const el=$(k);if(!el)return;if(el.type==='checkbox')el.checked=defaults[k];else el.value=defaults[k]});sync();toast('Default settings restored.')};
 $('pngBtn').onclick=()=>{try{canvas.toBlob(blob=>{if(!blob){toast('PNG export failed in this browser.');return}download(blob,'particle-loop-frame.png');toast('PNG frame exported.')},'image/png')}catch(e){toast('Could not export canvas. Try a modern browser.')}};
-$('webmBtn').onclick=async()=>{if(!canvas.captureStream||!window.MediaRecorder){toast('WebM recording is not supported by this browser. Try Chrome or Edge on a newer system.');return}if(recording)return;recording=true;$('webmBtn').disabled=true;const wasPlaying=playing;if(!playing){playing=true;start=performance.now();raf=requestAnimationFrame(render)}try{const stream=canvas.captureStream(30);let mime='video/webm;codecs=vp9';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';const rec=new MediaRecorder(stream,MediaRecorder.isTypeSupported(mime)?{mimeType:mime}:undefined);const chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};rec.onerror=()=>toast('Recording failed. Browser or memory limit may have been reached.');rec.onstop=()=>{download(new Blob(chunks,{type:'video/webm'}),'particle-loop-'+$('loopMode').value+'-'+cfg.duration+'s.webm');stream.getTracks().forEach(t=>t.stop());recording=false;$('webmBtn').disabled=false;if(!wasPlaying){playing=false;cancelAnimationFrame(raf);$('playBtn').textContent='▶ Play'}toast('WebM recording exported. Check loop seam in your editor.')};rec.start();toast('Exporting one '+cfg.duration+' second seamless loop segment…');setTimeout(()=>{if(rec.state!=='inactive')rec.stop()},Number(cfg.duration)*1000)}catch(e){recording=false;$('webmBtn').disabled=false;toast('Recording could not start in this browser.')}}
+$('webmBtn').onclick=async()=>{
+if(!canvas.captureStream||!window.MediaRecorder){toast('WebM recording is not supported by this browser.');return}
+if(recording)return;
+recording=true;$('webmBtn').disabled=true;
+const wasPlaying=playing;
+cancelAnimationFrame(raf);playing=false;
+try{
+  const fps=30,totalFrames=Math.max(120,Math.round(Number(cfg.duration)*fps));
+  const stream=canvas.captureStream(0),track=stream.getVideoTracks()[0];
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')?'video/webm;codecs=vp9':'video/webm';
+  const rec=new MediaRecorder(stream,MediaRecorder.isTypeSupported(mime)?{mimeType:mime}:undefined);
+  const chunks=[];
+  rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+  rec.onerror=()=>toast('Recording failed. Browser or memory limit may have been reached.');
+  rec.onstop=()=>{
+    download(new Blob(chunks,{type:'video/webm'}),'particle-loop-'+$('loopMode').value+'-'+cfg.duration+'s.webm');
+    stream.getTracks().forEach(t=>t.stop());recording=false;$('webmBtn').disabled=false;
+    if(wasPlaying){playing=true;start=performance.now();raf=requestAnimationFrame(render)}
+    else{$('playBtn').textContent='▶ Play'}
+    toast('Loop asset exported with frame-aligned start/end. Test repeat in your editor.');
+  };
+  rec.start();
+  const drawFrame=frame=>{
+    render(performance.now(),frame/totalFrames);
+    if(track.requestFrame)track.requestFrame();
+    if(frame+1<totalFrames)requestAnimationFrame(()=>drawFrame(frame+1));
+    else setTimeout(()=>{if(rec.state!=='inactive')rec.stop()},100);
+  };
+  toast('Rendering '+totalFrames+' synchronized frames for a seamless loop…');
+  drawFrame(0);
+}catch(e){
+  recording=false;$('webmBtn').disabled=false;
+  if(wasPlaying){playing=true;start=performance.now();raf=requestAnimationFrame(render)}
+  toast('Recording could not start in this browser.');
+}}
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function toast(s){$('toast').textContent=s}
 sync();document.querySelectorAll('.library-card').forEach(b=>b.classList.toggle('active',b.dataset.preset===cfg.preset));restart();
