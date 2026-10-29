@@ -25,12 +25,12 @@ header{padding:24px clamp(16px,4vw,42px) 18px;border-bottom:1px solid #1d2a3c;di
 <aside>
 <section class="panel"><div class="panel-head"><strong>01 / CANVAS & PRESET</strong><span class="eyebrow">Setup</span></div><div class="controls">
 <div class="control"><div class="label-row"><label for="ratio">Aspect ratio</label></div><select id="ratio"><option value="16:9">16:9 · YouTube / desktop</option><option value="9:16">9:16 · Shorts / Reels</option><option value="1:1">1:1 · Square post</option><option value="4:5">4:5 · Portrait post</option><option value="21:9">21:9 · Cinematic</option></select></div>
-<div class="control"><div class="label-row"><label for="preset">Motion recipe</label></div><select id="preset"><option value="aurora">Falling Snow</option><option value="stardust">Stardust field</option><option value="embers">Warm embers</option><option value="ice">Arctic particles</option><option value="orbit">Orbital flow</option><option value="minimal">Minimal dust</option><option value="bokeh">Bokeh drift</option><option value="nebula">Nebula veil</option><option value="fireflies">Fireflies</option><option value="snow">Snowfall</option></select></div>
+<div class="control"><div class="label-row"><label for="preset">Motion recipe</label></div><select id="preset"><option value="aurora">Falling Snow</option><option value="stardust">Starlight dust</option><option value="embers">Warm embers</option><option value="ice">Arctic particles</option><option value="orbit">Orbital flow</option><option value="minimal">Minimal dust</option><option value="bokeh">Bokeh drift</option><option value="nebula">Nebula veil</option><option value="fireflies">Fireflies</option><option value="petal">Petal flow</option></select></div>
 <div class="control"><div class="label-row"><label for="quality">Render size</label></div><select id="quality"><option value="960">Preview / 960px</option><option value="1280">HD / 1280px</option><option value="1920">Full HD / 1920px</option></select><div class="sub">Higher resolutions use more memory and CPU.</div></div>
 </div></section>
 <section class="panel"><div class="panel-head"><strong>PRESET LIBRARY</strong><span class="eyebrow">10 looks</span></div><div class="library-grid" id="libraryGrid">
 <button class="library-card" data-preset="aurora"><b>Falling Snow</b><small>Soft, continuously falling snow</small></button>
-<button class="library-card" data-preset="stardust"><b>Stardust Field</b><small>Fine drifting particles</small></button>
+<button class="library-card" data-preset="stardust"><b>Starlight Dust</b><small>Fine stars and sparkle flares</small></button>
 <button class="library-card" data-preset="embers"><b>Warm Embers</b><small>Rising glowing sparks</small></button>
 <button class="library-card" data-preset="ice"><b>Arctic Particles</b><small>Cool crystalline drift</small></button>
 <button class="library-card" data-preset="orbit"><b>Orbital Flow</b><small>Looping orbital paths</small></button>
@@ -38,7 +38,7 @@ header{padding:24px clamp(16px,4vw,42px) 18px;border-bottom:1px solid #1d2a3c;di
 <button class="library-card" data-preset="bokeh"><b>Bokeh Drift</b><small>Soft defocused lights</small></button>
 <button class="library-card" data-preset="nebula"><b>Nebula Veil</b><small>Layered cosmic haze</small></button>
 <button class="library-card" data-preset="fireflies"><b>Fireflies</b><small>Organic glowing pulses</small></button>
-<button class="library-card" data-preset="snow"><b>Snowfall</b><small>Gentle falling flakes</small></button>
+<button class="library-card" data-preset="petal"><b>Petal Flow</b><small>Soft drifting flower petals</small></button>
 </div><div class="section-note">Choose a visual recipe to load its motion settings.</div></section>
 <section class="panel"><div class="panel-head"><strong>02 / PARTICLE ENGINE</strong><span class="eyebrow">Motion</span></div><div class="controls">
 <div class="control"><div class="label-row"><label for="count">Particle density</label><span class="value" id="countVal">110</span></div><input id="count" type="range" min="20" max="260" step="10" value="60"></div>
@@ -102,13 +102,12 @@ if(kind==='orbit'){
 }else if(kind==='fireflies'){
   x+=.025*Math.sin(phase*2+p.phase);
   y+=.025*Math.cos(phase);
-}else if(kind==='snow'){
-  x+=.018*Math.sin(phase*2+p.phase);
-  y+=.045*Math.sin(phase);
+}else if(kind==='petal'){
+  x+=.055*Math.sin(phase+p.y*3);
+  y+=.035*Math.cos(phase*.5+p.phase);
 }else if(kind==='aurora'){
-  const fall=(t*cycles*.20)%1;
-  y=(p.y+fall)%1;
-  x+=.018*Math.sin(phase+p.y*5);
+  y+=.12*Math.sin(phase);
+  x+=.025*Math.sin(phase*.5+p.y*5);
 }else{
   x+=.035*Math.sin(phase);
   y+=.025*Math.cos(phase);
@@ -177,13 +176,50 @@ if(!cfg.transparent){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,
 
 const pts=particles.map(p=>{const q=point(p,t);return {x:q.x*w,y:q.y*h,p,q}})
 if(cfg.connect){ctx.lineWidth=Math.max(.5,w/1800);for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<w*.075){ctx.strokeStyle=rgba(pts[i].p.color?cfg.colorB:cfg.colorA,(1-d/(w*.075))*.16);ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
-for(const o of pts){const p=o.p,x=o.x,y=o.y;const pulse=.65+.35*Math.sin(o.q.phase);const radius=(Number(cfg.size)*w/960)*(0.45+p.r*.45)*(cfg.preset==='bokeh'?2.8:cfg.preset==='fireflies'?1.5:cfg.preset==='aurora'?0.85:1);const color=p.color?cfg.colorB:cfg.colorA;const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100);
-if(cfg.preset==='nebula'){const rg=ctx.createRadialGradient(x,y,0,x,y,radius*9);rg.addColorStop(0,rgba(color,alpha*.14));rg.addColorStop(1,rgba(color,0));ctx.fillStyle=rg;ctx.beginPath();ctx.arc(x,y,radius*9,0,Math.PI*2);ctx.fill()}
-if(cfg.trails){ctx.strokeStyle=rgba(color,alpha*.22);ctx.lineWidth=Math.max(.5,radius*.55);ctx.beginPath();ctx.moveTo(x-radius*(2+2*Math.sin(o.q.phase)),y+radius);ctx.lineTo(x,y);ctx.stroke()}
-if(cfg.glow>0){ctx.beginPath();ctx.fillStyle=rgba(color,alpha*Number(cfg.glow)*.22);ctx.arc(x,y,radius*(2.3+Number(cfg.glow)*2),0,Math.PI*2);ctx.fill()}
-ctx.save();ctx.shadowColor=rgba(color,alpha*.9);ctx.shadowBlur=Number(cfg.blur)*(w/960);ctx.beginPath();ctx.fillStyle=rgba(color,alpha);ctx.arc(x,y,radius,0,Math.PI*2);ctx.fill();ctx.restore();
-if(cfg.preset==='snow'||cfg.preset==='aurora'){ctx.strokeStyle=rgba(color,alpha*.7);ctx.lineWidth=Math.max(1,radius*.45);ctx.beginPath();ctx.moveTo(x-radius,y);ctx.lineTo(x+radius,y);ctx.moveTo(x,y-radius);ctx.lineTo(x,y+radius);ctx.stroke()}
-if(p.r>1.5){ctx.beginPath();ctx.fillStyle='rgba(255,255,255,'+(alpha*.6)+')';ctx.arc(x,y,radius*.28,0,Math.PI*2);ctx.fill()}}
+for(const o of pts){
+const p=o.p,x=o.x,y=o.y,phase=o.q.phase;
+const pulse=.55+.45*Math.sin(phase),color=p.color?cfg.colorB:cfg.colorA;
+const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100);
+const base=Number(cfg.size)*w/960*(.55+p.r*.55);
+ctx.save();ctx.globalAlpha=alpha;
+if(cfg.preset==='embers'){
+  ctx.strokeStyle=rgba('#ff8a24',alpha);ctx.lineWidth=Math.max(1,base*.8);
+  ctx.beginPath();ctx.moveTo(x,y+base*3);ctx.lineTo(x+Math.sin(phase)*base*.7,y-base*2.5);ctx.stroke();
+  ctx.fillStyle=rgba('#ffd27a',alpha*.8);ctx.beginPath();ctx.arc(x,y-base*2,base*.7,0,Math.PI*2);ctx.fill();
+}else if(cfg.preset==='ice'){
+  ctx.strokeStyle=rgba('#c8f2ff',alpha);ctx.lineWidth=Math.max(.7,base*.35);
+  for(let a=0;a<6;a++){const ang=a*Math.PI/3;ctx.beginPath();ctx.moveTo(x-Math.cos(ang)*base*2,y-Math.sin(ang)*base*2);ctx.lineTo(x+Math.cos(ang)*base*2,y+Math.sin(ang)*base*2);ctx.stroke()}
+}else if(cfg.preset==='orbit'){
+  ctx.strokeStyle=rgba(color,alpha*.7);ctx.lineWidth=Math.max(.6,base*.3);
+  ctx.beginPath();ctx.ellipse(x,y,base*5,base*1.8,phase*.08,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle=rgba('#ffffff',alpha);ctx.beginPath();ctx.arc(x,y,base*.8,0,Math.PI*2);ctx.fill();
+}else if(cfg.preset==='minimal'){
+  ctx.fillStyle=rgba(color,alpha*.55);ctx.beginPath();ctx.arc(x,y,Math.max(.5,base*.45),0,Math.PI*2);ctx.fill();
+}else if(cfg.preset==='bokeh'){
+  ctx.strokeStyle=rgba(color,alpha*.55);ctx.lineWidth=Math.max(.7,base*.25);ctx.fillStyle=rgba(color,alpha*.12);
+  ctx.beginPath();ctx.arc(x,y,base*3.2,0,Math.PI*2);ctx.fill();ctx.stroke();
+}else if(cfg.preset==='nebula'){
+  ctx.fillStyle=rgba(color,alpha*.10);ctx.beginPath();ctx.arc(x,y,base*5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=rgba(color,alpha*.55);ctx.beginPath();ctx.arc(x,y,base*.8,0,Math.PI*2);ctx.fill();
+}else if(cfg.preset==='fireflies'){
+  ctx.fillStyle=rgba('#baff55',alpha*.18);ctx.beginPath();ctx.arc(x,y,base*3.5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=rgba('#eaff9b',alpha);ctx.beginPath();ctx.arc(x,y,base*.75,0,Math.PI*2);ctx.fill();
+}else if(cfg.preset==='stardust'){
+  ctx.strokeStyle=rgba(color,alpha*.85);ctx.lineWidth=Math.max(.6,base*.28);
+  ctx.beginPath();ctx.moveTo(x-base*2.4,y);ctx.lineTo(x+base*2.4,y);ctx.moveTo(x,y-base*2.4);ctx.lineTo(x,y+base*2.4);ctx.stroke();
+  ctx.fillStyle=rgba('#ffffff',alpha*.8);ctx.beginPath();ctx.arc(x,y,base*.55,0,Math.PI*2);ctx.fill();
+}else if(cfg.preset==='petal'){
+  ctx.translate(x,y);ctx.rotate(phase*.12);
+  ctx.fillStyle=rgba('#ff83c8',alpha*.85);ctx.beginPath();ctx.ellipse(0,0,base*1.1,base*2.4,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=rgba('#ffd6ef',alpha*.55);ctx.lineWidth=Math.max(.5,base*.2);ctx.beginPath();ctx.moveTo(0,-base*1.8);ctx.lineTo(0,base*1.8);ctx.stroke();
+}else{
+  // Falling snow: alternate tiny dots and six-armed flakes.
+  ctx.strokeStyle=rgba('#eaf8ff',alpha);ctx.fillStyle=rgba('#ffffff',alpha);
+  if(p.r>1.25){ctx.lineWidth=Math.max(.6,base*.28);for(let a=0;a<3;a++){const ang=a*Math.PI/3;ctx.beginPath();ctx.moveTo(x-Math.cos(ang)*base*2,y-Math.sin(ang)*base*2);ctx.lineTo(x+Math.cos(ang)*base*2,y+Math.sin(ang)*base*2);ctx.stroke()}}
+  else{ctx.beginPath();ctx.arc(x,y,Math.max(.6,base*.65),0,Math.PI*2);ctx.fill()}
+}
+ctx.restore();
+}
 if(playing)raf=requestAnimationFrame(render)}
 function restart(){cancelAnimationFrame(raf);start=performance.now();playing=true;$('playBtn').textContent='Ⅱ Pause';raf=requestAnimationFrame(render)}
 function resize(){const oldW=canvas.width;const w=Number(cfg.quality);const dims=ratioDims(cfg.ratio,w);canvas.width=dims[0];canvas.height=dims[1];$('formatLabel').textContent=dims[0]+' × '+dims[1]+' · '+cfg.ratio;rebuild();restart()}
