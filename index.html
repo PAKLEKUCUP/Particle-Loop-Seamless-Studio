@@ -173,19 +173,60 @@ function drawAurora(w,h,t){
   }
   ctx.restore();
 }
+function drawCinematicAtmosphere(w,h,t){
+  const TAU=Math.PI*2, glow=Number(cfg.glow), blur=Number(cfg.blur);
+  const warm=cfg.preset==='embers'||cfg.preset==='fireflies';
+  const cold=cfg.preset==='ice'||cfg.preset==='aurora'||cfg.preset==='stardust';
+  const c1=warm?'#ff8a42':cold?'#6dcfff':cfg.colorA;
+  const c2=warm?'#ffcf78':cold?'#b9eaff':cfg.colorB;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  // Broad, low-opacity volumetric light clouds.
+  for(let i=0;i<4;i++){
+    const x=w*(.18+i*.22)+Math.sin(t*TAU+i*1.7)*w*.045;
+    const y=h*(.22+(i%2)*.34)+Math.cos(t*TAU+i)*h*.035;
+    const radius=w*(.13+(i%3)*.035);
+    const g=ctx.createRadialGradient(x,y,0,x,y,radius);
+    g.addColorStop(0,rgba(i%2?c2:c1,.055+glow*.035));
+    g.addColorStop(.45,rgba(i%2?c1:c2,.022+glow*.018));
+    g.addColorStop(1,rgba(c1,0));
+    ctx.fillStyle=g;ctx.fillRect(x-radius,y-radius,radius*2,radius*2);
+  }
+  // Defocused background lights create visible depth without heavy filters.
+  const bokeh=Math.min(18,Math.max(8,Math.round(Number(cfg.count)*.12)));
+  for(let i=0;i<bokeh;i++){
+    const phase=t*TAU+(i*2.399),x=(.5+.43*Math.sin(i*7.13+phase*.23))*w;
+    const y=(.5+.42*Math.cos(i*4.71-phase*.19))*h;
+    const r=w*(.004+(i%4)*.0025);
+    const g=ctx.createRadialGradient(x,y,0,x,y,r*3);
+    g.addColorStop(0,rgba(i%2?c1:c2,.12+glow*.08));
+    g.addColorStop(.35,rgba(i%2?c2:c1,.045+glow*.035));
+    g.addColorStop(1,rgba(c1,0));
+    ctx.fillStyle=g;ctx.fillRect(x-r*3,y-r*3,r*6,r*6);
+  }
+  // Fine atmospheric beam for ember, aurora and stardust looks.
+  if(warm||cfg.preset==='aurora'||cfg.preset==='nebula'){
+    const beam=ctx.createLinearGradient(0,0,w,h);
+    beam.addColorStop(0,rgba(c1,0));beam.addColorStop(.48,rgba(c2,.025+glow*.025));beam.addColorStop(1,rgba(c1,0));
+    ctx.fillStyle=beam;ctx.fillRect(0,0,w,h);
+  }
+  ctx.restore();
+}
 function render(now){if(playing&&now-lastFrame<32){raf=requestAnimationFrame(render);return}lastFrame=now;const w=canvas.width,h=canvas.height,t=((now-start)/1000/Number(cfg.duration))%1;ctx.clearRect(0,0,w,h);
 if(!cfg.transparent){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#071322');g.addColorStop(1,'#02050b');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
+drawCinematicAtmosphere(w,h,t);
 
 const pts=particles.map(p=>{const q=point(p,t);return {x:q.x*w,y:q.y*h,p,q}})
 if(cfg.connect){ctx.lineWidth=Math.max(.5,w/1800);for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.hypot(dx,dy);if(d<w*.075){ctx.strokeStyle=rgba(pts[i].p.color?cfg.colorB:cfg.colorA,(1-d/(w*.075))*.16);ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
 for(const o of pts){
 const p=o.p,x=o.x,y=o.y,phase=o.q.phase;
 const pulse=.55+.45*Math.sin(phase),color=p.color?cfg.colorB:cfg.colorA;
-const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100);
-const base=Number(cfg.size)*w/960*(.55+p.r*.55);
+const depth=.32+p.layer*.95;
+const alpha=p.alpha*pulse*(1-Number(cfg.transparency)/100)*(.48+p.layer*.52);
+const base=Number(cfg.size)*w/960*(.45+p.r*.62)*depth;
 ctx.save();ctx.globalAlpha=alpha;
+ctx.shadowColor=rgba(color,.8);ctx.shadowBlur=Math.min(22,Number(cfg.blur)*2.2+glow*10)*(0.35+p.layer*.65);
 if(cfg.preset==='embers'){
-  ctx.strokeStyle=rgba('#ff8a24',alpha);ctx.lineWidth=Math.max(1,base*.8);
+  ctx.lineCap='round';ctx.strokeStyle=rgba('#ff8a24',alpha);ctx.lineWidth=Math.max(1,base*.8);
   ctx.beginPath();ctx.moveTo(x,y+base*3);ctx.lineTo(x+Math.sin(phase)*base*.7,y-base*2.5);ctx.stroke();
   ctx.fillStyle=rgba('#ffd27a',alpha*.8);ctx.beginPath();ctx.arc(x,y-base*2,base*.7,0,Math.PI*2);ctx.fill();
 }else if(cfg.preset==='ice'){
